@@ -3,30 +3,37 @@ class Player:
       self.name = ""
       self.symbol = ""
 
-   def choose_name(self):
+   def choose_name(self, player_number):
       while True:
-         name = input("Enter your name: ")
+         name = input(f"{player_number} Player, Choose Your Name: ")
          if name.isalpha():
             self.name = name
             break
          print("Invalid name. Please enter a valid name.")
 
-   def choose_symbol(self):
+   def choose_symbol(self, other_symbol=None):
       while True:
-         symbol = input(f"{self.name} Choose your symbol only(X or O): ").upper()
-         if symbol in ['X', 'O']:
-            self.symbol = symbol
-            break
+         if other_symbol:
+            if other_symbol == 'X':
+               self.symbol = 'O'
+               break
+            else:
+               self.symbol = 'X'
+               break
          else:
-            print("Invalid symbol. Please choose X or O.")
-            
+            symbol = input(f"{self.name} Choose your symbol only(X or O): ").upper()
+            if symbol in ['X', 'O']:
+               self.symbol = symbol
+               break
+            else:
+               print("Invalid symbol. Please choose X or O.")
+
 
 class Menu:
    def start_game(self):
       menu ="""
          welcome to tic toy gameplay
-         1-toStart or 2-toEnd
-         Enter your choice (1 or 2) : 
+         1-toStart or 2-toEnd : 
       """
       choice = input(menu)
       return choice
@@ -91,8 +98,12 @@ class Game:
    
    def setup_players(self):
       for i, player in enumerate(self.players):
-         player.choose_name()
-         player.choose_symbol()
+         player_number = "First" if i == 0 else "Second"
+         player.choose_name(player_number)
+         if i == 0:
+            player.choose_symbol()
+         else:
+            player.choose_symbol(self.players[0].symbol)
          if i == 0:
             import os
             os.system('cls' if os.name == 'nt' else 'clear')
@@ -102,19 +113,22 @@ class Game:
       while True:
          self.board.display_board()
          current = self.players[self.current_player]
- 
+         
          choice = int(input(f"{current.name}'s turn. Choose a position (1-9): "))
+         
          if self.board.update_board(choice, current.symbol):
             if self.board.check_winner(current.symbol):
                os.system('cls' if os.name == 'nt' else 'clear')
                self.board.display_board()
                print(f"Congratulations! {current.name} wins!")
                break
+            
             elif self.board.is_board_full():
                os.system('cls' if os.name == 'nt' else 'clear')
                self.board.display_board()
                print("It's a draw!")
                break
+            
             self.current_player = (self.current_player + 1) % 2
             os.system('cls' if os.name == 'nt' else 'clear')
          else:
